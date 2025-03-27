@@ -1,0 +1,69 @@
+import requests
+import time
+
+# Lista de personajes principales (puedes agregar más si lo deseas)
+personajes_principales = [
+    "Rick Sanchez", "Morty Smith", "Summer Smith", "Beth Smith", "Jerry Smith"
+]
+
+# URL base de la API
+URL_API = "https://rickandmortyapi.com/api/character/"
+
+def obtener_personajes_principales_vivos():
+    start_time = time.time()  # Inicio de medición de tiempo
+    
+    try:
+        response = requests.get(URL_API)
+        response_time = time.time() - start_time  # Calcular tiempo de respuesta
+
+        # Mostrar código de estado
+        print(f"Código de estado: {response.status_code}")
+        print(f"Tiempo de respuesta: {response_time:.4f} segundos")
+
+        # Validar si la respuesta es exitosa
+        if response.status_code == 200:
+            data = response.json()
+
+            # Validar que 'results' sea una lista
+            if not isinstance(data.get('results'), list):
+                print("Error: La estructura de los datos no es válida.")
+                return
+            
+            personajes_vivos = []
+
+            for personaje in data['results']:
+                nombre = personaje.get('name', 'Desconocido')
+                status = personaje.get('status', 'Desconocido')
+
+                # Validación de tipos de datos
+                if not isinstance(nombre, str) or not isinstance(status, str):
+                    print(f"Error de tipo de dato en personaje: {personaje}")
+                    continue
+
+                # Filtrar solo personajes principales y vivos
+                if nombre in personajes_principales and status == "Alive":
+                    personajes_vivos.append({
+                        'name': nombre,
+                        'species': personaje.get('species', 'Desconocida'),
+                        'gender': personaje.get('gender', 'Desconocido'),
+                        'status': status,
+                        'image': personaje.get('image', 'Sin imagen')
+                    })
+
+            # Mostrar personajes vivos encontrados
+            if personajes_vivos:
+                print("\nPersonajes principales vivos en Rick and Morty:")
+                for p in personajes_vivos:
+                    print(f"Nombre: {p['name']}, Especie: {p['species']}, Género: {p['gender']}, Estado: {p['status']}")
+                    print(f"Imagen: {p['image']}\n")
+            else:
+                print("\nNo hay personajes principales vivos.")
+
+        else:
+            print("Error: No se pudo obtener la información de la API.")
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error al conectar con la API: {e}")
+
+# Ejecutar la función
+obtener_personajes_principales_vivos()
