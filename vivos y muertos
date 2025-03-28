@@ -1,0 +1,52 @@
+import requests
+import time
+
+# URL base
+URL = "https://rickandmortyapi.com/api/character"
+
+def validate_character_data(character):
+    """Valida tipos de datos básicos en el response"""
+    valid = True
+    if not isinstance(character.get("id"), int):
+        print(f"❌ ID inválido en {character.get('name')}")
+        valid = False
+    if not isinstance(character.get("name"), str):
+        print(f"❌ Nombre inválido en ID {character.get('id')}")
+        valid = False
+    if not isinstance(character.get("status"), str):
+        print(f"❌ Status inválido en ID {character.get('id')}")
+        valid = False
+    return valid
+
+def main():
+    print("Consultando personajes principales...")
+    start_time = time.time()
+    response = requests.get(URL, params={"page": 1})
+    elapsed_time = time.time() - start_time
+
+    print(f"Status Code: {response.status_code}")
+    print(f"Tiempo de respuesta: {elapsed_time:.3f} segundos")
+
+    if response.status_code != 200:
+        print("❗ Error al consultar la API")
+        return
+
+    data = response.json()
+    alive_count = 0
+    dead_count = 0
+
+    for character in data["results"]:
+        # Validación de tipos de datos
+        if validate_character_data(character):
+            # Validación de estado de vida
+            status = character.get("status")
+            if status == "Alive":
+                alive_count += 1
+            elif status == "Dead":
+                dead_count += 1
+
+    print(f" Personajes vivos: {alive_count}")
+    print(f" Personajes muertos: {dead_count}")
+
+if __name__ == "__main__":
+    main()
